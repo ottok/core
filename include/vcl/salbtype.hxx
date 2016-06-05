@@ -97,19 +97,16 @@ private:
     sal_uInt8               mcBlueOrIndex;
     sal_uInt8               mcGreen;
     sal_uInt8               mcRed;
-    sal_uInt8               mbIndex; // should be bool, but see above warning
-
+    sal_uInt8               mcAlpha;
 public:
 
     inline              BitmapColor();
-    inline              BitmapColor( sal_uInt8 cRed, sal_uInt8 cGreen, sal_uInt8 cBlue );
+    inline              BitmapColor( sal_uInt8 cRed, sal_uInt8 cGreen, sal_uInt8 cBlue, sal_uInt8 cAlpha = 0 );
     inline              BitmapColor( const Color& rColor );
     explicit inline     BitmapColor( sal_uInt8 cIndex );
 
     inline bool         operator==( const BitmapColor& rBitmapColor ) const;
     inline bool         operator!=( const BitmapColor& rBitmapColor ) const;
-
-    inline bool         IsIndex() const;
 
     inline sal_uInt8    GetRed() const;
     inline void         SetRed( sal_uInt8 cRed );
@@ -122,6 +119,9 @@ public:
 
     inline sal_uInt8    GetIndex() const;
     inline void         SetIndex( sal_uInt8 cIndex );
+
+    inline sal_uInt8    GetAlpha() const;
+    inline void         SetAlpha( sal_uInt8 cAlpha );
 
     operator            Color() const;
 
@@ -285,15 +285,15 @@ inline BitmapColor::BitmapColor() :
             mcBlueOrIndex   ( 0 ),
             mcGreen         ( 0 ),
             mcRed           ( 0 ),
-            mbIndex         ( sal_uInt8(false) )
+            mcAlpha         ( 0 )
 {
 }
 
-inline BitmapColor::BitmapColor( sal_uInt8 cRed, sal_uInt8 cGreen, sal_uInt8 cBlue ) :
+inline BitmapColor::BitmapColor( sal_uInt8 cRed, sal_uInt8 cGreen, sal_uInt8 cBlue, sal_uInt8 cAlpha ) :
             mcBlueOrIndex   ( cBlue ),
             mcGreen         ( cGreen ),
             mcRed           ( cRed ),
-            mbIndex         ( sal_uInt8(false) )
+            mcAlpha         ( cAlpha )
 {
 }
 
@@ -301,7 +301,7 @@ inline BitmapColor::BitmapColor( const Color& rColor ) :
             mcBlueOrIndex   ( rColor.GetBlue() ),
             mcGreen         ( rColor.GetGreen() ),
             mcRed           ( rColor.GetRed() ),
-            mbIndex         ( sal_uInt8(false) )
+            mcAlpha         ( rColor.GetTransparency() )
 {
 }
 
@@ -309,15 +309,16 @@ inline BitmapColor::BitmapColor( sal_uInt8 cIndex ) :
             mcBlueOrIndex   ( cIndex ),
             mcGreen         ( 0 ),
             mcRed           ( 0 ),
-            mbIndex         ( sal_uInt8(true) )
+            mcAlpha         ( 0 )
 {
 }
 
 inline bool BitmapColor::operator==( const BitmapColor& rBitmapColor ) const
 {
-    return( ( mcBlueOrIndex == rBitmapColor.mcBlueOrIndex ) &&
-            ( mbIndex ? bool(rBitmapColor.mbIndex) :
-            ( mcGreen == rBitmapColor.mcGreen && mcRed == rBitmapColor.mcRed ) ) );
+    return mcBlueOrIndex == rBitmapColor.mcBlueOrIndex &&
+           mcGreen == rBitmapColor.mcGreen &&
+           mcRed == rBitmapColor.mcRed &&
+           mcAlpha == rBitmapColor.mcAlpha;
 }
 
 inline bool BitmapColor::operator!=( const BitmapColor& rBitmapColor ) const
@@ -325,63 +326,59 @@ inline bool BitmapColor::operator!=( const BitmapColor& rBitmapColor ) const
     return !( *this == rBitmapColor );
 }
 
-inline bool BitmapColor::IsIndex() const
-{
-    return mbIndex;
-}
-
 inline sal_uInt8 BitmapColor::GetRed() const
 {
-    DBG_ASSERT( !mbIndex, "Pixel represents index into colortable!" );
     return mcRed;
 }
 
 inline void BitmapColor::SetRed( sal_uInt8 cRed )
 {
-    DBG_ASSERT( !mbIndex, "Pixel represents index into colortable!" );
     mcRed = cRed;
 }
 
 inline sal_uInt8 BitmapColor::GetGreen() const
 {
-    DBG_ASSERT( !mbIndex, "Pixel represents index into colortable!" );
     return mcGreen;
 }
 
 inline void BitmapColor::SetGreen( sal_uInt8 cGreen )
 {
-    DBG_ASSERT( !mbIndex, "Pixel represents index into colortable!" );
     mcGreen = cGreen;
 }
 
 inline sal_uInt8 BitmapColor::GetBlue() const
 {
-    DBG_ASSERT( !mbIndex, "Pixel represents index into colortable!" );
     return mcBlueOrIndex;
 }
 
 inline void BitmapColor::SetBlue( sal_uInt8 cBlue )
 {
-    DBG_ASSERT( !mbIndex, "Pixel represents index into colortable!" );
     mcBlueOrIndex = cBlue;
 }
 
 inline sal_uInt8 BitmapColor::GetIndex() const
 {
-    DBG_ASSERT( mbIndex, "Pixel represents color values!" );
     return mcBlueOrIndex;
 }
 
 inline void BitmapColor::SetIndex( sal_uInt8 cIndex )
 {
-    DBG_ASSERT( mbIndex, "Pixel represents color values!" );
     mcBlueOrIndex = cIndex;
+}
+
+inline sal_uInt8 BitmapColor::GetAlpha() const
+{
+    return mcAlpha;
+}
+
+inline void BitmapColor::SetAlpha( sal_uInt8 cAlpha )
+{
+    mcAlpha = cAlpha;
 }
 
 inline BitmapColor::operator Color() const
 {
-    DBG_ASSERT( !mbIndex, "Pixel represents index into colortable!" );
-    return Color( mcRed, mcGreen, mcBlueOrIndex );
+    return Color(mcAlpha, mcRed, mcGreen, mcBlueOrIndex);
 }
 
 inline sal_uInt8 BitmapColor::GetBlueOrIndex() const
@@ -392,7 +389,6 @@ inline sal_uInt8 BitmapColor::GetBlueOrIndex() const
 
 inline BitmapColor& BitmapColor::Invert()
 {
-    DBG_ASSERT( !mbIndex, "Pixel represents index into colortable!" );
     mcBlueOrIndex = ~mcBlueOrIndex;
     mcGreen = ~mcGreen;
     mcRed = ~mcRed;
@@ -402,15 +398,12 @@ inline BitmapColor& BitmapColor::Invert()
 
 inline sal_uInt8 BitmapColor::GetLuminance() const
 {
-    DBG_ASSERT( !mbIndex, "Pixel represents index into colortable!" );
     return (static_cast<unsigned long>(mcBlueOrIndex) * 28UL + static_cast<unsigned long>(mcGreen) * 151UL + static_cast<unsigned long>(mcRed) * 77UL) >> 8;
 }
 
 
 inline BitmapColor& BitmapColor::Merge( const BitmapColor& rBitmapColor, sal_uInt8 cTransparency )
 {
-    DBG_ASSERT( !mbIndex, "Pixel represents index into colortable!" );
-    DBG_ASSERT( !rBitmapColor.mbIndex, "Pixel represents index into colortable!" );
     mcBlueOrIndex = COLOR_CHANNEL_MERGE( mcBlueOrIndex, rBitmapColor.mcBlueOrIndex, cTransparency );
     mcGreen = COLOR_CHANNEL_MERGE( mcGreen, rBitmapColor.mcGreen, cTransparency );
     mcRed = COLOR_CHANNEL_MERGE( mcRed, rBitmapColor.mcRed, cTransparency );
@@ -421,8 +414,6 @@ inline BitmapColor& BitmapColor::Merge( const BitmapColor& rBitmapColor, sal_uIn
 
 inline sal_uInt16 BitmapColor::GetColorError( const BitmapColor& rBitmapColor ) const
 {
-    DBG_ASSERT( !mbIndex, "Pixel represents index into colortable!" );
-    DBG_ASSERT( !rBitmapColor.mbIndex, "Pixel represents index into colortable!" );
     return static_cast<sal_uInt16>(
         abs( static_cast<int>(mcBlueOrIndex) - static_cast<int>(rBitmapColor.mcBlueOrIndex) ) +
         abs( static_cast<int>(mcGreen) - static_cast<int>(rBitmapColor.mcGreen) ) +
