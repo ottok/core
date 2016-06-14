@@ -142,6 +142,7 @@ private:
 public:
     bool                    HasGSUBstitutions( HDC ) const;
     bool                    IsGSUBstituted( sal_UCS4 ) const;
+    int                     GetTable( const char pTagName[5], const unsigned char*&, HDC ) const;
 };
 
 /** Class that creates (and destroys) a compatible Device Context.
