@@ -36,6 +36,9 @@ class CommonSalLayout : public GenericSalLayout
     css::uno::Reference<css::i18n::XBreakIterator> mxBreak;
 #ifdef _WIN32
     HDC mhDC;
+#elif defined(MACOSX) || defined(IOS)
+#else
+    ServerFont& mrServerFont;
 #endif
 
 public:
@@ -45,7 +48,9 @@ public:
     explicit                CommonSalLayout(const CoreTextStyle*);
 #else
     explicit                CommonSalLayout(ServerFont&);
+    ServerFont&             GetServerFont() const {return mrServerFont;}
 #endif
+
     virtual                 ~CommonSalLayout();
     void                    SetNeedFallback(ImplLayoutArgs&, sal_Int32, bool);
     void                    AdjustLayout(ImplLayoutArgs&) override;

@@ -42,6 +42,7 @@
 
 #include <cairo.h>
 #include <cairo-ft.h>
+#include "CommonSalLayout.hxx"
 
 CairoTextRender::CairoTextRender()
     : mnTextColor(MAKE_SALCOLOR(0x00, 0x00, 0x00)) //black
@@ -151,8 +152,11 @@ namespace
         return (3600 - (nDegree10th)) * M_PI / 1800.0;
     }
 }
+void CairoTextRender::DrawCommonSalLayout( const CommonSalLayout& )
+{
+}
 
-void CairoTextRender::DrawServerFontLayout( const ServerFontLayout& rLayout )
+void CairoTextRender::DrawServerFontLayout( const GenericSalLayout& rLayout, const ServerFont& rServerFont )
 {
     std::vector<cairo_glyph_t> cairo_glyphs;
     std::vector<int> glyph_extrarotation;
@@ -185,7 +189,7 @@ void CairoTextRender::DrawServerFontLayout( const ServerFontLayout& rLayout )
     if (cairo_glyphs.empty())
         return;
 
-    ServerFont& rFont = rLayout.GetServerFont();
+    const ServerFont& rFont = rServerFont;
     const FontSelectPattern& rFSD = rFont.GetFontSelData();
     int nHeight = rFSD.mnHeight;
     int nWidth = rFSD.mnWidth ? rFSD.mnWidth : nHeight;
@@ -507,7 +511,14 @@ SalLayout* CairoTextRender::GetTextLayout( ImplLayoutArgs& rArgs, int nFallbackL
         }
         else
 #endif
-            pLayout = new ServerFontLayout( *mpServerFont[ nFallbackLevel ] );
+            if(getenv("SAL_USE_COMMON_LAYOUT"))
+            {
+                pLayout = new CommonSalLayout( *mpServerFont[ nFallbackLevel ] );
+            }
+            else
+            {
+                pLayout = new ServerFontLayout( *mpServerFont[ nFallbackLevel ] );
+            }
     }
 
     return pLayout;

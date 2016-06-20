@@ -44,6 +44,8 @@ class FontSubsetInfo;
 class OpenGLContext;
 class OutputDevice;
 class ServerFontLayout;
+class ServerFont;
+class CommonSalLayout;
 struct SystemGraphicsData;
 
 #if ENABLE_CAIRO_CANVAS
@@ -217,7 +219,8 @@ public:
     virtual bool                GetGlyphOutline( sal_GlyphId, basegfx::B2DPolyPolygon& ) = 0;
 
     virtual SalLayout*          GetTextLayout( ImplLayoutArgs&, int nFallbackLevel ) = 0;
-    virtual void                DrawServerFontLayout( const ServerFontLayout& ) = 0;
+    virtual void                DrawServerFontLayout( const GenericSalLayout&, const ServerFont& ) = 0;
+    virtual void                DrawCommonSalLayout( const CommonSalLayout& ) = 0;
 
     virtual bool                supportsOperation( OutDevSupportType ) const = 0;
 

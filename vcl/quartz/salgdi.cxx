@@ -413,7 +413,7 @@ bool AquaSalGraphics::GetGlyphBoundRect( sal_GlyphId aGlyphId, Rectangle& rRect 
     return bRC;
 }
 
-void AquaSalGraphics::DrawServerFontLayout( const ServerFontLayout& )
+void AquaSalGraphics::DrawServerFontLayout( const GenericSalLayout&, const ServerFont& )
 {
 }
 

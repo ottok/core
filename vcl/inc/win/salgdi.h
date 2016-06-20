@@ -451,7 +451,7 @@ public:
     virtual bool            GetGlyphOutline( sal_GlyphId, basegfx::B2DPolyPolygon& ) override;
 
     virtual SalLayout*      GetTextLayout( ImplLayoutArgs&, int nFallbackLevel ) override;
-    virtual void            DrawServerFontLayout( const ServerFontLayout& ) override;
+    virtual void            DrawServerFontLayout( const GenericSalLayout&, const ServerFont& ) override;
 
     virtual bool            supportsOperation( OutDevSupportType ) const override;
     // Query the platform layer for control support

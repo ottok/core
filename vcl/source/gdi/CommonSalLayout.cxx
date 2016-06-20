@@ -24,6 +24,7 @@
 #include <com/sun/star/i18n/CharacterIteratorMode.hpp>
 #include <i18nlangtag/mslangid.hxx>
 #include <limits>
+#include <salgdi.hxx>
 
 #if defined(_WIN32)
 struct WinFontFaceWithHDC
@@ -97,7 +98,8 @@ CommonSalLayout::CommonSalLayout(CoreTextStyle* pCoreTextStyle)
 #else
 CommonSalLayout::CommonSalLayout(ServerFont& rServerFont)
 :   mpHBFace(nullptr),
-    maFontSelData(rServerFont.GetFontSelData())
+    maFontSelData(rServerFont.GetFontSelData()),
+    mrServerFont(rServerFont)
 {
     mpHBFace = hb_face_create_for_tables(getFontTable, &rServerFont, nullptr);
 }
@@ -194,9 +196,14 @@ void CommonSalLayout::AdjustLayout(ImplLayoutArgs& rArgs)
 //XXX Kashida
 }
 
-void CommonSalLayout::DrawText( SalGraphics& ) const
+void CommonSalLayout::DrawText(SalGraphics& rSalGraphics) const
 {
     //call platform dependent DrawText functions
+#if defined(_WIN32)
+#elif defined(MACOSX) || defined(IOS)
+#else
+    rSalGraphics.DrawServerFontLayout( *this, mrServerFont );
+#endif
 }
 
 bool CommonSalLayout::LayoutText(ImplLayoutArgs& rArgs)
@@ -204,9 +211,10 @@ bool CommonSalLayout::LayoutText(ImplLayoutArgs& rArgs)
     //XXX WinLayout object DOESN'T derive from GSL
     GenericSalLayout& rLayout = *this;
 
-    hb_font_t* pHBFont = hb_font_create(mpHBFace);
-    hb_font_set_ppem(pHBFont, maFontSelData.mnWidth, maFontSelData.mnHeight);
-    hb_font_set_scale(pHBFont, maFontSelData.mnWidth << 6, maFontSelData.mnHeight << 6);
+    hb_font_t *pHBFont = hb_font_create(mpHBFace);
+    hb_font_set_ppem(pHBFont, maFontSelData.mnWidth? maFontSelData.mnWidth:maFontSelData.mnHeight , maFontSelData.mnHeight);
+    hb_font_set_scale(pHBFont, (uint64_t)(maFontSelData.mnWidth? maFontSelData.mnWidth:maFontSelData.mnHeight) << 6
+                             , (uint64_t)maFontSelData.mnHeight << 6);
     hb_ot_font_set_funcs(pHBFont);
 
     int nGlyphCapacity = 2 * (rArgs.mnEndCharPos - rArgs.mnMinCharPos);
@@ -374,7 +382,6 @@ bool CommonSalLayout::LayoutText(ImplLayoutArgs& rArgs)
                 int32_t nYOffset =  pHbPositions[i].y_offset >> 6;
                 int32_t nXAdvance = pHbPositions[i].x_advance >> 6;
                 int32_t nYAdvance = pHbPositions[i].y_advance >> 6;
-
                 Point aNewPos = Point(aCurrPos.X() + nXOffset, -(aCurrPos.Y() + nYOffset));
                 // Definiton of glyphitem may have to change to support system graphics lib
                 const GlyphItem aGI(nCharPos, nGlyphIndex, aNewPos, nGlyphFlags, nXAdvance, nXOffset);

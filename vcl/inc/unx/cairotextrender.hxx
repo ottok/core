@@ -29,6 +29,7 @@
 typedef struct FT_FaceRec_* FT_Face;
 
 class ServerFont;
+class CommonSalLayout;
 class GlyphCache;
 typedef struct _cairo cairo_t;
 
@@ -118,7 +119,8 @@ public:
     virtual bool                GetGlyphBoundRect( sal_GlyphId nIndex, Rectangle& ) override;
     virtual bool                GetGlyphOutline( sal_GlyphId nIndex, basegfx::B2DPolyPolygon& ) override;
     virtual SalLayout*          GetTextLayout( ImplLayoutArgs&, int nFallbackLevel ) override;
-    virtual void                DrawServerFontLayout( const ServerFontLayout& ) override;
+    virtual void                DrawServerFontLayout( const GenericSalLayout&, const ServerFont& ) override;
+    virtual void                DrawCommonSalLayout( const CommonSalLayout& ) override;
 #if ENABLE_CAIRO_CANVAS
     virtual SystemFontData      GetSysFontData( int nFallbackLevel ) const override;
 #endif

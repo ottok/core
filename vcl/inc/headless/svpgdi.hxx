@@ -46,6 +46,7 @@
 struct BitmapBuffer;
 class GlyphCache;
 class ServerFont;
+class CommonSalLayout;
 typedef struct _cairo cairo_t;
 typedef struct _cairo_surface cairo_surface_t;
 typedef struct _cairo_user_data_key cairo_user_data_key_t;
@@ -152,7 +153,8 @@ public:
     virtual bool            GetGlyphBoundRect( sal_GlyphId nIndex, Rectangle& ) override;
     virtual bool            GetGlyphOutline( sal_GlyphId nIndex, basegfx::B2DPolyPolygon& ) override;
     virtual SalLayout*      GetTextLayout( ImplLayoutArgs&, int nFallbackLevel ) override;
-    virtual void            DrawServerFontLayout( const ServerFontLayout& ) override;
+    virtual void            DrawServerFontLayout( const GenericSalLayout&, const ServerFont& ) override;
+    virtual void            DrawCommonSalLayout( const CommonSalLayout& ) override;
     virtual bool            supportsOperation( OutDevSupportType ) const override;
     virtual void            drawPixel( long nX, long nY ) override;
     virtual void            drawPixel( long nX, long nY, SalColor nSalColor ) override;
